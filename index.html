@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>husk.fun</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+--bg:#0f1226;
+--card:#181c3a;
+--accent:#ffcc00;
+--secondary:#4dd0e1;
+--text:#fff;
+--muted:#aab0ff;
+}
+
+*{box-sizing:border-box;font-family:system-ui}
+body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
+
+header{text-align:center;padding:60px 20px 20px}
+h1{font-size:3.5rem;color:var(--accent);margin:0}
+p{color:var(--muted)}
+
+.games{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:22px;
+padding:40px;
+max-width:1200px;
+margin:auto
+}
+
+.game{
+background:var(--card);
+border-radius:16px;
+padding:28px;
+text-align:center;
+cursor:pointer;
+transition:.25s;
+box-shadow:0 10px 25px rgba(0,0,0,.3)
+}
+.game:hover{transform:translateY(-8px) scale(1.03)}
+
+.icon{font-size:2.6rem}
+.game h3{color:var(--secondary)}
+.game span{font-size:.9rem;color:var(--muted)}
+
+footer{text-align:center;padding:30px;color:var(--muted)}
+
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.7);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:10
+}
+.modal.active{display:flex}
+
+.box{
+background:#11143a;
+padding:30px;
+border-radius:18px;
+max-width:400px;
+width:90%;
+text-align:center;
+animation:pop .25s ease
+}
+
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+
+button{
+background:var(--accent);
+border:none;
+padding:10px 18px;
+border-radius:10px;
+cursor:pointer;
+font-weight:600
+}
+.close{background:#444;color:white;margin-top:10px}
+
+.bar{
+height:16px;
+background:#333;
+border-radius:8px;
+overflow:hidden;
+margin:20px 0
+}
+.fill{
+height:100%;
+width:0%;
+background:var(--secondary)
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>husk.fun</h1>
+<p>Play tiny experiments. Lose track of time.</p>
+</header>
+
+<section class="games">
+<div class="game" onclick="openGame('memory')"><div class="icon">🧠</div><h3>Memory Melt</h3><span>Remember the order</span></div>
+<div class="game" onclick="openGame('timer')"><div class="icon">⏱️</div><h3>1 Second Rule</h3><span>Stop at 1.00s</span></div>
+<div class="game" onclick="openGame('click')"><div class="icon">🎯</div><h3>Perfect Click</h3><span>Hit 50%</span></div>
+<div class="game" onclick="openGame('color')"><div class="icon">🟡</div><h3>Color Chaos</h3><span>Name the color</span></div>
+<div class="game" onclick="openGame('math')"><div class="icon">🔢</div><h3>Quick Math</h3><span>Answer fast</span></div>
+<div class="game" onclick="openGame('idea')"><div class="icon">💡</div><h3>Idea Generator</h3><span>Weird ideas</span></div>
+</section>
+
+<footer>© 2026 husk.fun</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+<div class="box" id="content"></div>
+</div>
+
+<script>
+const modal=document.getElementById("modal");
+const content=document.getElementById("content");
+
+function closeGame(){modal.classList.remove("active")}
+
+function openGame(type){
+modal.classList.add("active");
+
+if(type==="memory"){
+let emojis=["🍎","🚀","🎈","🐸","⚡"];
+let seq=[...emojis].sort(()=>Math.random()-.5);
+content.innerHTML=`
+<h2>Memory Melt</h2>
+<p>${seq.join(" ")}</p>
+<button onclick="this.previousElementSibling.textContent='❓ ❓ ❓ ❓ ❓'">Hide</button>
+<p>Did you remember?</p>
+<button class="close" onclick="closeGame()">Close</button>`;
+}
+
+if(type==="timer"){
+let start=Date.now();
+content.innerHTML=`
+<h2>1 Second Rule</h2>
+<button onclick="
+let t=((Date.now()-${start})/1000).toFixed(2);
+this.insertAdjacentHTML('afterend','<p>You stopped at '+t+'s</p>')
+">STOP</button>
+<button class="close" onclick="closeGame()">Close</button>`;
+}
+
+if(type==="click"){
+let pct=0;
+let i=setInterval(()=>{pct=(pct+1)%100;document.querySelector('.fill')?.style.width=pct+'%'},20);
+content.innerHTML=`
+<h2>Perfect Click</h2>
+<div class="bar"><div class="fill"></div></div>
+<button onclick="clearInterval(${i});alert('You clicked at '+pct+'%')">CLICK</button>
+<button class="close" onclick="closeGame()">Close</button>`;
+}
+
+if(type==="color"){
+const colors=["red","blue","green","yellow"];
+const word=colors[Math.floor(Math.random()*4)];
+const color=colors[Math.floor(Math.random()*4)];
+content.innerHTML=`
+<h2>Color Chaos</h2>
+<h1 style="color:${color}">${word.toUpperCase()}</h1>
+<p>Say the COLOR, not the word</p>
+<button class="close" onclick="closeGame()">Close</button>`;
+}
+
+if(type==="math"){
+let a=Math.floor(Math.random()*10),b=Math.floor(Math.random()*10);
+content.innerHTML=`
+<h2>Quick Math</h2>
+<p>${a} + ${b} = ?</p>
+<input id="ans">
+<button onclick="alert(ans.value==${a+b}?'Correct!':'Wrong')">Check</button>
+<button class="close" onclick="closeGame()">Close</button>`;
+}
+
+if(type==="idea"){
+const ideas=[
+"Uber for pigeons",
+"AI that judges your life",
+"A fridge that tweets",
+"Alarm clock that roasts you",
+"Dating app for plants"
+];
+content.innerHTML=`
+<h2>Idea Generator</h2>
+<h3>${ideas[Math.floor(Math.random()*ideas.length)]}</h3>
+<button onclick="openGame('idea')">Another</button>
+<button class="close" onclick="closeGame()">Close</button>`;
+}
+}
+</script>
+
+</body>
+</html>
